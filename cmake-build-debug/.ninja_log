@@ -1,8 +1,0 @@
-# ninja log v6
-1	238	7577227723354547	build.ninja	ed5d17ca25d8cdcc
-3	76	7577227802688038	CMakeFiles/02_dapper_dasher.dir/dapper_dasher.cpp.obj	cc0fcc6a56ccdcca
-77	300	7577227803434454	02_dapper_dasher.exe	fec41f4117d4a54e
-10	64	7577228415331804	CMakeFiles/02_dapper_dasher.dir/dapper_dasher.cpp.obj	cc0fcc6a56ccdcca
-65	226	7577228415882446	02_dapper_dasher.exe	fec41f4117d4a54e
-9	64	7577230836350269	CMakeFiles/02_dapper_dasher.dir/dapper_dasher.cpp.obj	cc0fcc6a56ccdcca
-64	224	7577230836909046	02_dapper_dasher.exe	fec41f4117d4a54e
