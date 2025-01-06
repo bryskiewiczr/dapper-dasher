@@ -1,5 +1,3 @@
-#include <wchar.h>
-
 #include "raylib.h"
 
 struct AnimationData {
@@ -9,6 +7,17 @@ struct AnimationData {
     float updateTime;
     float runningTime;
 };
+
+AnimationData updateAnimationData(AnimationData animationData, float deltaTime, int maxFrameValue) {
+    animationData.runningTime += deltaTime;
+    if (animationData.runningTime >= animationData.updateTime) {
+        animationData.runningTime = 0;
+        animationData.rec.x = animationData.frame * animationData.rec.width;
+        animationData.frame++;
+        if (animationData.frame > maxFrameValue) {animationData.frame = 0;}
+    }
+    return animationData;
+}
 
 int main() {
     const int windowDimensions[]{1024, 768};
@@ -60,8 +69,8 @@ int main() {
 
         float deltaTime(GetFrameTime());
 
-        bool isOnGround{scarfyAnimationData.pos.y >= windowDimensions[1] - scarfyAnimationData.rec.height};
         // ground check
+        bool isOnGround{scarfyAnimationData.pos.y >= windowDimensions[1] - scarfyAnimationData.rec.height};
         if (isOnGround) {
             // rectangle is on the ground
             scarfyVelocity = 0;
@@ -75,42 +84,26 @@ int main() {
             scarfyVelocity -= scarfyJumpVelocity;
         }
 
-        // update the position of
+        // update the position
         for (int i = 0; i < sizeOfNebulae; i++) {
             nebulae[i].pos.x += nebulaVelocity * deltaTime;
         }
         scarfyAnimationData.pos.y += scarfyVelocity * deltaTime;
 
+        // update animation data
         if (isOnGround) {
-            // update running time
-            scarfyAnimationData.runningTime += deltaTime;
-            if (scarfyAnimationData.runningTime >= scarfyAnimationData.updateTime) {
-                scarfyAnimationData.runningTime = 0;
-                // update animation frame
-                scarfyAnimationData.rec.x = scarfyAnimationData.frame * scarfyAnimationData.rec.width;
-                scarfyAnimationData.frame++;
-                if (scarfyAnimationData.frame > 5) {scarfyAnimationData.frame = 0;}
-            }
+            scarfyAnimationData = updateAnimationData(scarfyAnimationData, deltaTime, 5);
         }
-
         for (int i = 0; i < sizeOfNebulae; i++) {
-            nebulae[i].runningTime += deltaTime;
-            if (nebulae[i].runningTime >= nebulae[i].updateTime) {
-                nebulae[i].runningTime = 0;
-                nebulae[i].rec.x = nebulae[i].frame * nebulae[i].rec.width;
-                nebulae[i].frame++;
-                if (nebulae[i].frame > 7) {
-                    nebulae[i].frame = 0;
-                }
-            }
+            nebulae[i] = updateAnimationData(nebulae[i], deltaTime, 7);
         }
 
-        // draw Nebula
+        // draw characters
         for (int i = 0; i < sizeOfNebulae; i++) {
             DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
         }
-        // draw Scarfy
         DrawTextureRec(scarfy, scarfyAnimationData.rec, scarfyAnimationData.pos, WHITE);
+
         EndDrawing();
     }
     UnloadTexture(scarfy);
