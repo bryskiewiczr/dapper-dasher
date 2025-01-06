@@ -24,6 +24,8 @@ int main() {
 
     InitWindow(windowDimensions[0], windowDimensions[1], "Dapper Dasher!");
     SetTargetFPS(60);
+    DrawFPS(10, 10);
+    bool collision{false};
 
     // acceleration due to gravity (pixels/frame)/frame
     const int gravity{1000};
@@ -56,7 +58,7 @@ int main() {
 
     // enemy variables
     const int nebulaVelocity {-300};
-    const int sizeOfNebulae{20};
+    const int sizeOfNebulae{2};
     AnimationData nebulae[sizeOfNebulae]{};
     for (int i = 0; i < sizeOfNebulae; i++) {
         nebulae[i].rec.width = nebula.width/8;
@@ -69,6 +71,8 @@ int main() {
         nebulae[i].updateTime = 1.0 / 12.0;
         nebulae[i].runningTime = 0.0;
     }
+
+    float finishLine{nebulae[sizeOfNebulae - 1].pos.x + 150.0};
 
     // Game Loop
     while (!WindowShouldClose()) {
@@ -128,6 +132,7 @@ int main() {
             nebulae[i].pos.x += nebulaVelocity * deltaTime;
         }
         scarfyAnimationData.pos.y += scarfyVelocity * deltaTime;
+        finishLine += nebulaVelocity * deltaTime;
 
         // update animation data
         if (isOnGround) {
@@ -137,12 +142,37 @@ int main() {
             nebulae[i] = updateAnimationData(nebulae[i], deltaTime, 7);
         }
 
-        // draw characters
-        for (int i = 0; i < sizeOfNebulae; i++) {
-            DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
+        for (AnimationData nebula : nebulae) {
+            float pad{50.0};
+            Rectangle nebulaRec{
+                nebula.pos.x + pad,
+                nebula.pos.y + pad,
+                nebula.rec.width - 2 * pad,
+                nebula.rec.height - 2 * pad
+            };
+            Rectangle scarfyRec{
+                scarfyAnimationData.pos.x,
+                scarfyAnimationData.pos.y,
+                scarfyAnimationData.rec.width,
+                scarfyAnimationData.rec.height
+            };
+            if (CheckCollisionRecs(nebulaRec, scarfyRec)) {
+                collision = true;
+            }
         }
-        DrawTextureRec(scarfy, scarfyAnimationData.rec, scarfyAnimationData.pos, WHITE);
 
+        if (collision) {
+            DrawText("Game Over!", windowDimensions[0]/2, windowDimensions[1]/2, 32, RED);
+        } else {
+            // draw characters
+            for (int i = 0; i < sizeOfNebulae; i++) {
+                DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
+            }
+            DrawTextureRec(scarfy, scarfyAnimationData.rec, scarfyAnimationData.pos, WHITE);
+            if (scarfyAnimationData.pos.x >= finishLine) {
+                DrawText("You Win!", windowDimensions[0]/2, windowDimensions[1]/2, 32, GREEN);
+            }
+        }
         EndDrawing();
     }
     UnloadTexture(scarfy);
