@@ -20,7 +20,7 @@ AnimationData updateAnimationData(AnimationData animationData, float deltaTime, 
 }
 
 int main() {
-    const int windowDimensions[]{1024, 768};
+    const int windowDimensions[]{480, 320};
 
     InitWindow(windowDimensions[0], windowDimensions[1], "Dapper Dasher!");
     SetTargetFPS(60);
@@ -42,6 +42,14 @@ int main() {
     scarfyAnimationData.runningTime = 0.0;
     int scarfyVelocity{0};
     const int scarfyJumpVelocity{600};
+
+    // background
+    const Texture2D farBuildingsBackground = LoadTexture("textures/far-buildings.png");
+    const Texture2D backBuildingsBackground = LoadTexture("textures/back-buildings.png");
+    const Texture2D foregroundBuildingsBackground = LoadTexture("textures/foreground.png");
+    float farBuildingsBackgroundX{};
+    float backBuildingsBackgroundX{};
+    float foregroundBuildingsBackgroundX{};
 
     // enemy character "Nebula"
     const Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
@@ -68,6 +76,37 @@ int main() {
         ClearBackground(RAYWHITE);
 
         float deltaTime(GetFrameTime());
+
+        // draw the background
+        farBuildingsBackgroundX -= 20 * deltaTime;
+        backBuildingsBackgroundX -= 40 * deltaTime;
+        foregroundBuildingsBackgroundX -= 80 * deltaTime;
+
+        if (farBuildingsBackgroundX <= -farBuildingsBackground.width * 2) {
+            farBuildingsBackgroundX = 0;
+        }
+
+        if (backBuildingsBackgroundX <= -backBuildingsBackground.width * 2) {
+            backBuildingsBackgroundX = 0;
+        }
+
+        if (foregroundBuildingsBackgroundX <= -foregroundBuildingsBackground.width * 2) {
+            foregroundBuildingsBackgroundX = 0;
+        }
+        Vector2 farBuildingsBackgroundPos{farBuildingsBackgroundX, 0.0};
+        Vector2 farBuildingsBackground2Pos{farBuildingsBackgroundX + farBuildingsBackground.width * 2, 0.0};
+        DrawTextureEx(farBuildingsBackground, farBuildingsBackgroundPos, 0.0, 2.0, WHITE);
+        DrawTextureEx(farBuildingsBackground, farBuildingsBackground2Pos, 0.0, 2.0, WHITE);
+
+        Vector2 backBuildingsBackgroundPos{backBuildingsBackgroundX, 0.0};
+        Vector2 backBuildingsBackground2Pos{backBuildingsBackgroundX + backBuildingsBackground.width * 2, 0.0};
+        DrawTextureEx(backBuildingsBackground, backBuildingsBackgroundPos, 0.0, 2.0, WHITE);
+        DrawTextureEx(backBuildingsBackground, backBuildingsBackground2Pos, 0.0, 2.0, WHITE);
+
+        Vector2 foregroundBuildingsBackgroundPos{foregroundBuildingsBackgroundX, 0.0};
+        Vector2 foregroundBuildingsBackground2Pos{foregroundBuildingsBackgroundX + foregroundBuildingsBackground.width * 2, 0.0};
+        DrawTextureEx(foregroundBuildingsBackground, foregroundBuildingsBackgroundPos, 0.0, 2.0, WHITE);
+        DrawTextureEx(foregroundBuildingsBackground, foregroundBuildingsBackground2Pos, 0.0, 2.0, WHITE);
 
         // ground check
         bool isOnGround{scarfyAnimationData.pos.y >= windowDimensions[1] - scarfyAnimationData.rec.height};
@@ -108,5 +147,8 @@ int main() {
     }
     UnloadTexture(scarfy);
     UnloadTexture(nebula);
+    UnloadTexture(farBuildingsBackground);
+    UnloadTexture(foregroundBuildingsBackground);
+    UnloadTexture(backBuildingsBackground);
     CloseWindow();
 }
