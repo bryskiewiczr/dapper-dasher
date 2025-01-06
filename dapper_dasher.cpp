@@ -11,10 +11,9 @@ struct AnimationData {
 };
 
 int main() {
-    const int windowWidth{1024};
-    const int windowHeight{768};
+    const int windowDimensions[]{1024, 768};
 
-    InitWindow(windowWidth, windowHeight, "Dapper Dasher!");
+    InitWindow(windowDimensions[0], windowDimensions[1], "Dapper Dasher!");
     SetTargetFPS(60);
 
     // acceleration due to gravity (pixels/frame)/frame
@@ -27,8 +26,8 @@ int main() {
     scarfyAnimationData.rec.height = scarfy.height;
     scarfyAnimationData.rec.x = 0;
     scarfyAnimationData.rec.y = 0;
-    scarfyAnimationData.pos.x = windowWidth/2 - scarfyAnimationData.rec.width/2;
-    scarfyAnimationData.pos.y = windowHeight - scarfyAnimationData.rec.height;
+    scarfyAnimationData.pos.x = windowDimensions[0]/2 - scarfyAnimationData.rec.width/2;
+    scarfyAnimationData.pos.y = windowDimensions[1] - scarfyAnimationData.rec.height;
     scarfyAnimationData.frame = 0;
     scarfyAnimationData.updateTime = 1.0 / 12.0;
     scarfyAnimationData.runningTime = 0.0;
@@ -37,29 +36,22 @@ int main() {
 
     // enemy character "Nebula"
     const Texture2D nebula = LoadTexture("textures/12_nebula_spritesheet.png");
-    AnimationData nebulaAnimationData{};
-    nebulaAnimationData.rec.width = nebula.width/8;
-    nebulaAnimationData.rec.height = nebula.height;
-    nebulaAnimationData.rec.x = 0;
-    nebulaAnimationData.rec.y = 0;
-    nebulaAnimationData.pos.x = windowWidth;
-    nebulaAnimationData.pos.y = windowHeight - nebula.height/8;
-    nebulaAnimationData.frame = 0;
-    nebulaAnimationData.updateTime = 1.0 / 12.0;
-    nebulaAnimationData.runningTime = 0.0;
 
-    AnimationData nebula2AnimationData{};
-    nebula2AnimationData.rec.width = nebula.width/8;
-    nebula2AnimationData.rec.height = nebula.height;
-    nebula2AnimationData.rec.x = 0;
-    nebula2AnimationData.rec.y = 0;
-    nebula2AnimationData.pos.x = windowWidth + 300;
-    nebula2AnimationData.pos.y = windowHeight - nebula.height/8;
-    nebula2AnimationData.frame = 0;
-    nebula2AnimationData.updateTime = 1.0 / 16.0;
-    nebula2AnimationData.runningTime = 0.0;
-
-    int nebulaVelocity {-300};
+    // enemy variables
+    const int nebulaVelocity {-300};
+    const int sizeOfNebulae{20};
+    AnimationData nebulae[sizeOfNebulae]{};
+    for (int i = 0; i < sizeOfNebulae; i++) {
+        nebulae[i].rec.width = nebula.width/8;
+        nebulae[i].rec.height = nebula.height;
+        nebulae[i].rec.x = 0;
+        nebulae[i].rec.y = 0;
+        nebulae[i].pos.x = windowDimensions[0] + (450 * i);
+        nebulae[i].pos.y = windowDimensions[1] - nebula.height/8;
+        nebulae[i].frame = 0;
+        nebulae[i].updateTime = 1.0 / 12.0;
+        nebulae[i].runningTime = 0.0;
+    }
 
     // Game Loop
     while (!WindowShouldClose()) {
@@ -68,7 +60,7 @@ int main() {
 
         float deltaTime(GetFrameTime());
 
-        bool isOnGround{scarfyAnimationData.pos.y >= windowHeight - scarfyAnimationData.rec.height};
+        bool isOnGround{scarfyAnimationData.pos.y >= windowDimensions[1] - scarfyAnimationData.rec.height};
         // ground check
         if (isOnGround) {
             // rectangle is on the ground
@@ -83,9 +75,10 @@ int main() {
             scarfyVelocity -= scarfyJumpVelocity;
         }
 
-        // update the position of characters
-        nebulaAnimationData.pos.x += nebulaVelocity * deltaTime;
-        nebula2AnimationData.pos.x += nebulaVelocity * deltaTime;
+        // update the position of
+        for (int i = 0; i < sizeOfNebulae; i++) {
+            nebulae[i].pos.x += nebulaVelocity * deltaTime;
+        }
         scarfyAnimationData.pos.y += scarfyVelocity * deltaTime;
 
         if (isOnGround) {
@@ -100,31 +93,22 @@ int main() {
             }
         }
 
-        nebulaAnimationData.runningTime += deltaTime;
-        if (nebulaAnimationData.runningTime >= nebulaAnimationData.updateTime) {
-            nebulaAnimationData.runningTime = 0;
-            // update animation frame
-            nebulaAnimationData.rec.x = nebulaAnimationData.frame * nebulaAnimationData.rec.width;
-            nebulaAnimationData.frame++;
-            if (nebulaAnimationData.frame > 7) {
-                nebulaAnimationData.frame = 0;
-            }
-        }
-
-        nebula2AnimationData.runningTime += deltaTime;
-        if (nebula2AnimationData.runningTime >= nebula2AnimationData.updateTime) {
-            nebula2AnimationData.runningTime = 0;
-            // update animation frame
-            nebula2AnimationData.rec.x = nebula2AnimationData.frame * nebula2AnimationData.rec.width;
-            nebula2AnimationData.frame++;
-            if (nebula2AnimationData.frame > 7) {
-                nebula2AnimationData.frame = 0;
+        for (int i = 0; i < sizeOfNebulae; i++) {
+            nebulae[i].runningTime += deltaTime;
+            if (nebulae[i].runningTime >= nebulae[i].updateTime) {
+                nebulae[i].runningTime = 0;
+                nebulae[i].rec.x = nebulae[i].frame * nebulae[i].rec.width;
+                nebulae[i].frame++;
+                if (nebulae[i].frame > 7) {
+                    nebulae[i].frame = 0;
+                }
             }
         }
 
         // draw Nebula
-        DrawTextureRec(nebula, nebulaAnimationData.rec, nebulaAnimationData.pos, GREEN);
-        DrawTextureRec(nebula, nebula2AnimationData.rec, nebula2AnimationData.pos, RED);
+        for (int i = 0; i < sizeOfNebulae; i++) {
+            DrawTextureRec(nebula, nebulae[i].rec, nebulae[i].pos, WHITE);
+        }
         // draw Scarfy
         DrawTextureRec(scarfy, scarfyAnimationData.rec, scarfyAnimationData.pos, WHITE);
         EndDrawing();
